@@ -56,7 +56,6 @@ sh script.sh
 7.  Copy the provided Kubernetes files and run them by running `kubectl apply -f . `.
 8.  To get the IP address of your application, run `kubectl get all`.
 9.  Copy the IP address of the load balancer and insert it into your browser to access the application.
-![Screenshot from 2023-02-20 11-42-58](https://user-images.githubusercontent.com/68289149/220943334-9a97570c-fb00-4bf2-8046-5842f0535fbc.png)
 
 ![Screenshot from 2023-02-23 14-09-34](https://user-images.githubusercontent.com/68289149/220943347-7d574d91-99b6-4d71-ab50-4da99a2af4d8.png)
 ![Screenshot from 2023-02-23 14-09-40](https://user-images.githubusercontent.com/68289149/220943358-9c86e9ba-3847-43c9-b92e-b3e7478b754c.png)
