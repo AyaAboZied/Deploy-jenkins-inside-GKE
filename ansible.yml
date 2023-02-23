@@ -1,0 +1,151 @@
+---
+- name: Deploy Jenkins on GKE
+  hosts: localhost
+  gather_facts: no
+
+  vars:
+    gcp_project_id: mercurial-time-233114
+    gcp_region: asia-east1
+    gcp_zone: asia-east1-a
+    gke_cluster_name: jenkins-cluster
+    gke_node_pool_name: jenkins-pool
+    gke_node_count: 1
+    jenkins_namespace: jenkins
+    jenkins_service_account: jenkins
+    jenkins_pvc_name: jenkins-pvc
+    jenkins_deployment_name: jenkins
+    jenkins_image: jenkins/jenkins:lts
+    jenkins_service_name: jenkins
+    jenkins_http_port: 8080
+    jenkins_jnlp_port: 50000
+    jenkins_url_prefix: /jenkins
+
+  tasks:
+  - name: Authenticate with GCP
+    include_vars: gcp_vars.yml
+
+  - name: Create GKE cluster
+    gcp_container_cluster:
+      name: "{{ gke_cluster_name }}"
+      project: "{{ gcp_project_id }}"
+      zone: "{{ gcp_zone }}"
+      node_pools:
+      - name: "{{ gke_node_pool_name }}"
+        machine_type: n1-standard-1
+        initial_node_count: "{{ gke_node_count }}"
+    register: gke_cluster
+
+  - name: Get GKE credentials
+    gcp_container_get_credentials:
+      name: "{{ gke_cluster_name }}"
+      project: "{{ gcp_project_id }}"
+      zone: "{{ gcp_zone }}"
+
+  - name: Create Jenkins namespace
+    k8s:
+      name: "{{ jenkins_namespace }}"
+      kind: Namespace
+      state: present
+
+  - name: Create Jenkins service account
+    k8s:
+      name: "{{ jenkins_service_account }}"
+      namespace: "{{ jenkins_namespace }}"
+      kind: ServiceAccount
+      state: present
+
+  - name: Create Jenkins PVC
+    k8s:
+      name: "{{ jenkins_pvc_name }}"
+      namespace: "{{ jenkins_namespace }}"
+      kind: PersistentVolumeClaim
+      api_version: v1
+      state: present
+      definition:
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi
+
+  - name: Create Jenkins deployment
+    k8s:
+      name: "{{ jenkins_deployment_name }}"
+      namespace: "{{ jenkins_namespace }}"
+      kind: Deployment
+      api_version: apps/v1
+      state: present
+      definition:
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: jenkins
+          template:
+            metadata:
+              labels:
+                app: jenkins
+            spec:
+              serviceAccountName: "{{ jenkins_service_account }}"
+              containers:
+              - name: jenkins
+                image: "{{ jenkins_image }}"
+                ports:
+                - containerPort: "{{ jenkins_http_port }}"
+                - containerPort: "{{ jenkins_jnlp_port }}"
+                volumeMounts:
+                - name: jenkins-home
+                  mountPath: /var/jenkins_home
+                env:
+                - name: JENKINS_OPTS
+                  value: "{{ jenkins_url_prefix }}"
+              volumes:
+              - name: jenkins-home
+                persistentVolumeClaim:
+                  claimName: "{{ jenkins_pvc_name }}"
+
+  - name: Expose deployment
+    k8s:
+      definition:
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: jenkins
+          namespace: jenkins
+        spec:
+          selector:
+            app: jenkins
+          ports:
+          - name: http
+            port: 8080
+            targetPort: 8080
+          - name: jnlp
+            port: 50000
+            targetPort: 50000
+          type: LoadBalancer
+      state: present
+  
+  - name: Save IP address
+    set_fact:
+      jenkins_ip: "{{ jenkins_svc.external_ip }}"
+    when: jenkins_svc is defined
+
+  - name: Configure Jenkins service URL
+    k8s:
+      namespace: "{{ jenkins_namespace }}"
+      name: "{{ jenkins_service_name }}"
+      kind: Service
+      api_version: v1
+      patch:
+        spec:
+          type: LoadBalancer
+          ports:
+          - name: http
+            port: 80
+            targetPort: "{{ jenkins_http_port }}"
+          - name: jnlp
+            port: 50000
+            targetPort: "{{ jenkins_jnlp_port }}"
+          selector:
+            app: jenkins
