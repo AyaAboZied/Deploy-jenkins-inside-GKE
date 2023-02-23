@@ -4,8 +4,10 @@
 ----------------
 
 The purpose of this project is to deploy a backend application on a Kubernetes cluster using a Jenkins CI/CD pipeline. The infrastructure will be created using Terraform on Google Cloud Platform (GCP), and the application will be containerized using Docker.
+![MicrosoftTeams-image](https://user-images.githubusercontent.com/68289149/220943038-abe62ba5-a8ed-4307-996f-c409fa7e9289.png)
 
 ## Tools Used
+
 ----------
 
 The following tools will be used for this project:
@@ -54,6 +56,12 @@ sh script.sh
 7.  Copy the provided Kubernetes files and run them by running `kubectl apply -f . `.
 8.  To get the IP address of your application, run `kubectl get all`.
 9.  Copy the IP address of the load balancer and insert it into your browser to access the application.
+![Screenshot from 2023-02-20 11-42-58](https://user-images.githubusercontent.com/68289149/220943334-9a97570c-fb00-4bf2-8046-5842f0535fbc.png)
+
+![Screenshot from 2023-02-23 14-09-34](https://user-images.githubusercontent.com/68289149/220943347-7d574d91-99b6-4d71-ab50-4da99a2af4d8.png)
+![Screenshot from 2023-02-23 14-09-40](https://user-images.githubusercontent.com/68289149/220943358-9c86e9ba-3847-43c9-b92e-b3e7478b754c.png)
+
+![Screenshot from 2023-02-23 14-22-55](https://user-images.githubusercontent.com/68289149/220943518-c2fe8d55-f92f-4634-a215-7607ba45a39a.png)
 
 ## Jenkins Slave Configration
 ------------
@@ -77,3 +85,7 @@ gcloud auth login
 gcloud auth configure-docker
 chmod 666 /var/run/docker.sock
 ```
+![Screenshot from 2023-02-23 14-50-08](https://user-images.githubusercontent.com/68289149/220943661-019646bd-6ff0-455e-a097-b471ae187d4e.png)
+![Screenshot from 2023-02-23 16-58-55](https://user-images.githubusercontent.com/68289149/220943896-a7c9b959-cf0b-45df-a762-9479dada1b00.png)
+
+
