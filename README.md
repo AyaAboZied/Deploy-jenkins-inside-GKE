@@ -4,6 +4,7 @@
 ----------------
 
 The purpose of this project is to deploy a backend application on a Kubernetes cluster using a Jenkins CI/CD pipeline. The infrastructure will be created using Terraform on Google Cloud Platform (GCP), and the application will be containerized using Docker.
+
 ![MicrosoftTeams-image](https://user-images.githubusercontent.com/68289149/220943038-abe62ba5-a8ed-4307-996f-c409fa7e9289.png)
 
 ## Tools Used
